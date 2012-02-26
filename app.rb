@@ -16,6 +16,7 @@ class Songkick
 	API_KEY = 'UokXlLzqCN1zhOWe'
 	ROOT_URL = 'http://api.songkick.com/api/3.0/'
 	def self.get_loc_id(city)
+		city = URI.escape(city)
 		url = "#{ROOT_URL}search/locations.json?query=#{city}&apikey=#{API_KEY}" 
 		parsed_json_response = JSON.parse(RestClient.get(url))
 		loc_id = parsed_json_response['resultsPage']['results']['location'][0]['metroArea']['id']  
