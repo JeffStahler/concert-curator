@@ -1,9 +1,21 @@
 <h1> <%= params[:city] %> </h1>
 <h1> <%= params[:min_date] %> </h1>
 <h1> <%= params[:max_date] %> </h1>
-
 <ul>
-  <% @metro_calendar.each do |event| %>
-    <li><%= event['displayName'] %></li>
+ <% @metro_calendar.events.each do |event| %>
+    <li><%= event.title %></li>
+   		<% event.artists.each do |artist| %>
+   			<ul>
+   			   <li> <%= artist %> </li>
+   			   	
+   			</ul>
+ 	    <% end %>
+   		<% event.top_songs.each do |song| %>
+   			<ul>
+   			   <li> <%= song %> </li>
+   			   	
+   			</ul>
+ 	    <% end %>
    <% end %>
+
  </ul>

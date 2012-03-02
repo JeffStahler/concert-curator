@@ -3,9 +3,8 @@ get '/' do
 end 
 
 
-
 post '/search' do
-  @metro_calendar = Songkick.get_events_by_city_and_dates(params[:city], params[:min_date], params[:max_date])
+  @metro_calendar = Concert_Search.new  params[:city], params[:min_date], params[:max_date] 
   erb :search
 end
 
@@ -13,6 +12,49 @@ post '/grooveshark' do
   @song = Grooveshark.get_top_song(params[:query])
   erb :grooveshark
 end
+
+
+
+
+
+
+
+class Concert_Search
+	attr_accessor :events, :songkick, :grooveshark
+
+
+	def initialize(city, min_date, max_date)
+		self.grooveshark =  Grooveshark.new
+		metro_calendar = Songkick.get_events_by_city_and_dates(city, min_date, max_date)
+		self.events = []
+		metro_calendar.first(10).each do |songkick_event|
+			event = Event.new
+			event.title = songkick_event['displayName'] 
+			songkick_event['performance'].each do |performance|
+				event.artists.push(performance['artist']['displayName'])
+	#			top_song = Grooveshark.get_top_song(performance['artist']['displayName']) 
+#				unless top_song.empty?
+#					event.top_songs.push(top_song)
+#				end 
+			end
+			self.events.push(event)
+		end 
+	end
+
+end 
+
+class Event
+	attr_accessor :title, :artists, :top_songs
+	def initialize
+		self.artists = []
+		self.top_songs = []
+	end
+end 
+
+
+
+
+
 
 
 
@@ -26,11 +68,10 @@ class Grooveshark
 		 
 		url = "#{ROOT_URL}#{query}&#{FORMAT}&#{API_PARAM}"
 		json = JSON.parse(RestClient.get(url))
-
-		json['Song_Widget'] = self.single_song_widget(json['SongID']) 
-		json 
-#		{"Url":"http:\/\/tinysong.com\/knej","SongID":13963,"SongName":"Ask About Me","ArtistID":77,"ArtistName":"Girl Talk","AlbumID":117512,"AlbumName":"Night Ripper"}
-#		http://tinysong.com/b/Girl+Talk+Ask+About+Me?format=json&key=APIKey
+		unless json.empty? 
+		     json['Song_Widget'] = self.single_song_widget(json['SongID']) 
+	    end 
+	    json 
 	end
 
 	def self.single_song_widget(song_id)
@@ -39,7 +80,7 @@ class Grooveshark
 		widget_html.gsub(/_SONG_ID_/,song_id.to_s)
 
 	
-end
+	end
 
 
 end 
@@ -74,4 +115,4 @@ class Songkick
 		json = JSON.parse(RestClient.get(url))
 		json['resultsPage']['results']['event'] 
 	end 
-end 
+end
