@@ -1,4 +1,4 @@
-get '/' do 
+	get '/' do 
 	erb :index
 end 
 
@@ -10,19 +10,13 @@ post '/search' do
 end
 
 #post '/songkick' do 
-##  erb :songkick
-#end 
-
+##  erb :songk
 
 post '/grooveshark' do 
   @song = Grooveshark.get_top_song(params[:query])
   @widget = Grooveshark.single_song_widget(@song['SongID']) if @song
   erb :grooveshark
 end
-
-
-
-
 
 
 
@@ -34,21 +28,26 @@ class Concert_Search
 		self.grooveshark =  Grooveshark.new
 		metro_calendar = Songkick.get_events_by_city_and_dates(city, min_date, max_date)
 		self.events = []
-		metro_calendar.first(10).each do |songkick_event|
+		metro_calendar.first(2).each do |songkick_event|
 			event = Event.new
 			event.title = songkick_event['displayName'] 
 			songkick_event['performance'].each do |performance|
 				event.artists.push(performance['artist']['displayName'])
- 	     		top_song = Grooveshark.get_top_song(performance['artist']['displayName']) 
-				unless top_song.nil?
-					event.top_songs.push(top_song['Song_Widget'])
+ 	     	 	top_song =   Grooveshark.get_top_song(performance['artist']['displayName'])
+				if top_song.nil?					
+					event.top_songs.push('No Song') 
+	 			
+				else
+					song_widget = Grooveshark.single_song_widget(top_song)
+					event.top_songs.push(song_widget)
+				
 				end 
 			end
 			self.events.push(event)
 		end 
 	end
 
-end 
+end
 
 class Event
 	attr_accessor :title, :artists, :top_songs
@@ -71,8 +70,16 @@ class Grooveshark
 	API_PARAM = 'key=69cd853e5352c9d96db26925c3c770f6'
 
 	# get top song
-	# returns hash with ... if found
+	# returns hash with 
+	#   song['SongID']
+	#   song['ArtistName']
+	#   song['SongName']
+	#   song['AlbumName']
+
+	#... if found
+	
 	# returns nil if nothing found
+
 	def self.get_top_song(query)
 
 		query = URI.escape(query)		 
@@ -85,8 +92,8 @@ class Grooveshark
 
 
 
-	def self.single_song_widget(song_id)
-
+	def self.single_song_widget(top_song)
+		song_id = top_song['SongID']
 		return 0 if song_id.nil?
 		widget_html = '<object width="250" height="40" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" id="gsSong_SONG_ID_26" name="gsSong_SONG_ID_26"><param name="movie" value="http://grooveshark.com/songWidget.swf" /><param name="wmode" value="window" /><param name="allowScriptAccess" value="always" /><param name="flashvars" value="hostname=cowbell.grooveshark.com&songIDs=_SONG_ID_&style=metal&p=0" /><object type="application/x-shockwave-flash" data="http://grooveshark.com/songWidget.swf" width="250" height="40"><param name="wmode" value="window" /><param name="allowScriptAccess" value="always" /><param name="flashvars" value="hostname=cowbell.grooveshark.com&songIDs=_SONG_ID_&style=metal&p=0" /></object></object>'
 		widget_html.gsub(/_SONG_ID_/,song_id.to_s)
