@@ -35,11 +35,12 @@ class Concert_Search
 				event.artists.push(performance['artist']['displayName'])
  	     	 	top_song =   Grooveshark.get_top_song(performance['artist']['displayName'])
 				if top_song.nil?					
-					event.top_songs.push('No Song') 
+					event.top_songs[performance['artist']['displayName']] = 'No Song' 
 	 			
 				else
 					song_widget = Grooveshark.single_song_widget(top_song)
-					event.top_songs.push(song_widget)
+					event.top_songs[performance['artist']['displayName']] = song_widget
+					#event.artists.push(song_widget)
 				
 				end 
 			end
@@ -53,7 +54,7 @@ class Event
 	attr_accessor :title, :artists, :top_songs
 	def initialize
 		self.artists = []
-		self.top_songs = []
+		self.top_songs = {}
 	end
 end 
 

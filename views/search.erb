@@ -8,14 +8,9 @@
    			<ul>
    		<% event.artists.each do |artist| %>
    			   <li> <%= artist %> </li>
-   			   	
- 	    <% end %>
-   			</ul>
-
-   			<ul>
-   		<% event.top_songs.each do |song| %>
-   			   <li> <%= song %> </li>
-   			   	
+   			   <ul>
+               <li> <%= event.top_songs[artist] %> </li>                     
+               </ul>	
  	    <% end %>
    			</ul>
 
