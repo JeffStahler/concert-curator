@@ -4,18 +4,21 @@
 <ul>
  <% @metro_calendar.events.each do |event| %>
     <li><%= event.title %></li>
-   		<% event.artists.each do |artist| %>
+
    			<ul>
+   		<% event.artists.each do |artist| %>
    			   <li> <%= artist %> </li>
    			   	
-   			</ul>
  	    <% end %>
-   		<% event.top_songs.each do |song| %>
+   			</ul>
+
    			<ul>
+   		<% event.top_songs.each do |song| %>
    			   <li> <%= song %> </li>
    			   	
-   			</ul>
  	    <% end %>
+   			</ul>
+
    <% end %>
 
  </ul>

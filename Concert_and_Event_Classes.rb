@@ -17,7 +17,7 @@ class Concert_Search
 				unless top_song.empty?
 					event.top_songs.push(top_song)
 				end 
-
+			end
 			events.push(events)
 		end 
 	end
@@ -30,5 +30,4 @@ class Event
 		self.artists = []
 		self.top_songs = []
 	end
-
 end 

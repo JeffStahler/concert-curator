@@ -4,12 +4,19 @@ end
 
 
 post '/search' do
-  @metro_calendar = Concert_Search.new  params[:city], params[:min_date], params[:max_date] 
+ # @metro_calendar = Songkick.get_events_by_city_and_dates(params[:city], params[:min_date], params[:max_date])
+  @metro_calendar = Concert_Search.new  params[:city], params[:min_date], params[:max_date]
   erb :search
 end
 
+#post '/songkick' do 
+##  erb :songkick
+#end 
+
+
 post '/grooveshark' do 
   @song = Grooveshark.get_top_song(params[:query])
+  @widget = Grooveshark.single_song_widget(@song['SongID']) if @song
   erb :grooveshark
 end
 
@@ -32,10 +39,10 @@ class Concert_Search
 			event.title = songkick_event['displayName'] 
 			songkick_event['performance'].each do |performance|
 				event.artists.push(performance['artist']['displayName'])
-	#			top_song = Grooveshark.get_top_song(performance['artist']['displayName']) 
-#				unless top_song.empty?
-#					event.top_songs.push(top_song)
-#				end 
+ 	     		top_song = Grooveshark.get_top_song(performance['artist']['displayName']) 
+				unless top_song.nil?
+					event.top_songs.push(top_song['Song_Widget'])
+				end 
 			end
 			self.events.push(event)
 		end 
@@ -63,22 +70,26 @@ class Grooveshark
 	FORMAT = '?format=json'
 	API_PARAM = 'key=69cd853e5352c9d96db26925c3c770f6'
 
+	# get top song
+	# returns hash with ... if found
+	# returns nil if nothing found
 	def self.get_top_song(query)
-		query = URI.escape(query)
-		 
+
+		query = URI.escape(query)		 
 		url = "#{ROOT_URL}#{query}&#{FORMAT}&#{API_PARAM}"
 		json = JSON.parse(RestClient.get(url))
-		unless json.empty? 
-		     json['Song_Widget'] = self.single_song_widget(json['SongID']) 
-	    end 
-	    json 
+		json.empty? ? nil : json 
 	end
 
+
+
+
+
 	def self.single_song_widget(song_id)
-	
+
+		return 0 if song_id.nil?
 		widget_html = '<object width="250" height="40" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" id="gsSong_SONG_ID_26" name="gsSong_SONG_ID_26"><param name="movie" value="http://grooveshark.com/songWidget.swf" /><param name="wmode" value="window" /><param name="allowScriptAccess" value="always" /><param name="flashvars" value="hostname=cowbell.grooveshark.com&songIDs=_SONG_ID_&style=metal&p=0" /><object type="application/x-shockwave-flash" data="http://grooveshark.com/songWidget.swf" width="250" height="40"><param name="wmode" value="window" /><param name="allowScriptAccess" value="always" /><param name="flashvars" value="hostname=cowbell.grooveshark.com&songIDs=_SONG_ID_&style=metal&p=0" /></object></object>'
 		widget_html.gsub(/_SONG_ID_/,song_id.to_s)
-
 	
 	end
 

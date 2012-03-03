@@ -1,0 +1,9 @@
+<h1> <%= params[:city] %> </h1>
+<h1> <%= params[:min_date] %> </h1>
+<h1> <%= params[:max_date] %> </h1>
+
+<ul>
+  <%  @metro_calendar.each do |event| %>
+    <li><%= event['displayName'] %></li>
+   <%  end %>
+ </ul>

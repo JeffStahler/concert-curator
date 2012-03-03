@@ -1,8 +1,10 @@
-    <h1>Song ID :<%= @song['SongID']%></h1>
-    <h1>Artist :<%= @song['ArtistName']%></h1>
-    <h1>Song : <%= @song['SongName']%></h1>
-    <h1>Album : <%= @song['AlbumName']%></h1>
-    </br>
-	<%= @song['Song_Widget']%>
-
-
+    <% if @song %> 
+	    <h1>Song ID :<%= @song['SongID']%></h1>
+	    <h1>Artist :<%= @song['ArtistName']%></h1>
+	    <h1>Song : <%= @song['SongName']%></h1>
+	    <h1>Album : <%= @song['AlbumName']%></h1>
+	    </br>	
+		<%= @widget%>
+	<% else %>
+		<h1>No Song Found </h1>
+	<% end %>
