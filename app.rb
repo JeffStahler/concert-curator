@@ -32,14 +32,15 @@ class Concert_Search
 			event = Event.new
 			event.title = songkick_event['displayName'] 
 			songkick_event['performance'].each do |performance|
-				event.artists.push(performance['artist']['displayName'])
- 	     	 	top_song =   Grooveshark.get_top_song(performance['artist']['displayName'])
+				artist_name = performance['artist']['displayName']
+				event.artists.push(artist_name)
+ 	     	 	top_song =   Grooveshark.get_top_song(artist_name)
 				if top_song.nil?					
-					event.top_songs[performance['artist']['displayName']] = 'No Song' 
+					event.top_songs[artist_name] = 'No Song' 
 	 			
 				else
 					song_widget = Grooveshark.single_song_widget(top_song)
-					event.top_songs[performance['artist']['displayName']] = song_widget
+					event.top_songs[artist_name] = song_widget
 					#event.artists.push(song_widget)
 				
 				end 
