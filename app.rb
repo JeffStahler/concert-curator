@@ -1,4 +1,4 @@
-	get '/' do 
+get '/' do 
 	erb :index
 end 
 
@@ -18,7 +18,11 @@ post '/grooveshark' do
   erb :grooveshark
 end
 
-
+post '/venues' do
+	
+	@venues = Songkick.venue_seach(params[:query]) || []
+	erb :venues
+end
 
 class Concert_Search
 	attr_accessor :events, :songkick, :grooveshark
@@ -117,6 +121,14 @@ class Songkick
 		json = JSON.parse(RestClient.get(url))
 		json['resultsPage']['results']['location'][0]['metroArea']['id']  
 	end
+
+	def self.venue_seach(query)
+		query = URI.escape(query)
+		url = "#{ROOT_URL}search/venues.json?query=#{query}&#{API_PARAM}"
+		json = JSON.parse(RestClient.get(url))
+		json['resultsPage']['results']['venue']
+	end
+
 
 	def self.get_metro_calendar_using_loc_id(loc_id)
 		url = "#{ROOT_URL}metro_areas/#{loc_id}/calendar.json?#{API_PARAM}"  
