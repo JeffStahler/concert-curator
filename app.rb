@@ -20,7 +20,7 @@ end
 
 post '/venues' do
 	
-	@venues = Songkick.venue_seach(params[:query]) || []
+	@venue_events = Songkick.get_venue_events(params[:query]) || []
 	erb :venues
 end
 
@@ -127,8 +127,18 @@ class Songkick
 		url = "#{ROOT_URL}search/venues.json?query=#{query}&#{API_PARAM}"
 		json = JSON.parse(RestClient.get(url))
 		json['resultsPage']['results']['venue']
+
 	end
 
+
+	def self.get_venue_events(query)
+		venues = self.venue_seach(query)
+		venue_id = venues[0]['id']
+		url = "#{ROOT_URL}venues/#{venue_id}/calendar.json?#{API_PARAM}"
+		json = JSON.parse(RestClient.get(url))
+		json['resultsPage']['results']['event']  
+
+	end
 
 	def self.get_metro_calendar_using_loc_id(loc_id)
 		url = "#{ROOT_URL}metro_areas/#{loc_id}/calendar.json?#{API_PARAM}"  
