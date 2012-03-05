@@ -18,6 +18,39 @@ post '/grooveshark' do
   erb :grooveshark
 end
 
+
+post '/stream_spot' do
+ 
+ @calendar = Venue_Search.new params[:query] 
+ spotify_URIs_array = []
+  stream do |out|
+  	 out << "<ul>"
+   	 @calendar.events.each do |event|		
+		 out << "<li>"
+		 out <<	event.title  	   	
+	   	 out << "</li>"
+		 out << "<ul>"
+	   	 event.artists.each do |artist| 
+	 		out << "<li>"
+	 		out << artist
+	 		out << "</li>"
+
+	 		spotify_uri = Spotify.find_track(artist)
+			unless spotify_uri.nil?
+				spotify_URIs_array.push(spotify_uri)
+			end 
+
+     	 end
+     	 out << "</ul>"
+  	 end
+  	 out << "</ul>"
+  	 top_songs_spotify_uri = spotify_URIs_array.join('          ')
+  	 out << top_songs_spotify_uri
+  end
+
+end
+
+
 post '/venues' do
 	
 	@calendar = Venue_Search.new params[:query] 
@@ -45,37 +78,37 @@ class Venue_Search
 		metro_calendar = Songkick.get_venue_events(query)
 		self.events = []
 		self.top_songs = []
-		spotify_URIs_array = []  
+		#spotify_URIs_array = []  
 		metro_calendar.each do |songkick_event|
 			event = Event.new
 			event.title = songkick_event['displayName'] 
 			songkick_event['performance'].each do |performance|
 				artist_name = performance['artist']['displayName']
 				event.artists.push(artist_name)
-				spotify_uri = Spotify.find_track(artist_name)
-				unless spotify_uri.nil?
-					spotify_URIs_array.push(spotify_uri)
-				end 
+				#spotify_uri = Spotify.find_track(artist_name)
+				#unless spotify_uri.nil?
+			#		spotify_URIs_array.push(spotify_uri)
+			#	end 
 
-				if gs then  
-	 	     	 	top_song =   Grooveshark.get_top_song(artist_name)
-					unless top_song.nil?					
-					self.top_songs.push(top_song['SongID'])							
-					self.
-					song_widget = Grooveshark.single_song_widget(top_song)
-					event.top_songs[artist_name] = song_widget
+		#		if gs then  
+	 	#     	 	top_song =   Grooveshark.get_top_song(artist_name)
+	#				unless top_song.nil?					
+#					self.top_songs.push(top_song['SongID'])							
+		#			self.
+		#			song_widget = Grooveshark.single_song_widget(top_song)
+		#			event.top_songs[artist_name] = song_widget
 					#event.artists.push(song_widget)
 				
-					end 
-				end 
+		#			end 
+		#		end 
 			end
 			self.events.push(event)
-			self.top_songs_spotify_uri = spotify_URIs_array.join('          ')
+			#self.top_songs_spotify_uri = spotify_URIs_array.join('          ')
 			
 		end 
-		if gs then 
-			self.playlist_widget = Grooveshark.mutli_song_widget(self.top_songs)	
-		end 
+		#if gs then 
+		#	self.playlist_widget = Grooveshark.mutli_song_widget(self.top_songs)	
+		#end 
 	end
 
 end 
@@ -151,8 +184,6 @@ class Grooveshark
 
 
 	def self.mutli_song_widget(song_ids)
-		song_ids.push(30678788)
-		song_ids.push(23026077)
 
 		id = song_ids.join('')
 		id_csv = song_ids.join(',')
@@ -203,7 +234,7 @@ class Spotify
 		query = URI.escape(query)
 		url = "#{ROOT_URL}#{query}"
 		json = JSON.parse(RestClient.get(url))
-		sleep 0.1
+#		sleep 0.1
 		json['tracks'].empty? ? nil : json['tracks'][0]['href'] 		
 	rescue
 		nil
