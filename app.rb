@@ -24,6 +24,7 @@ post '/stream_spot' do
  @calendar = Venue_Search.new params[:query] 
  spotify_URIs_array = []
   stream do |out|
+  	 out << "To play in spotify, copy and paste text below solid line. "
   	 out << "<ul>"
    	 @calendar.events.each do |event|		
 		 out << "<li>"
@@ -44,6 +45,7 @@ post '/stream_spot' do
      	 out << "</ul>"
   	 end
   	 out << "</ul>"
+  	 out << <HR WIDTH="100%" COLOR="#6699FF" SIZE="6">
   	 top_songs_spotify_uri = spotify_URIs_array.join('          ')
   	 out << top_songs_spotify_uri
   end
