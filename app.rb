@@ -45,7 +45,7 @@ post '/stream_spot' do
      	 out << "</ul>"
   	 end
   	 out << "</ul>"
-  	 out << <HR WIDTH="100%" COLOR="#6699FF" SIZE="6">
+  	 out << '<HR WIDTH="100%" COLOR="#6699FF" SIZE="6">'
   	 top_songs_spotify_uri = spotify_URIs_array.join('          ')
   	 out << top_songs_spotify_uri
   end
