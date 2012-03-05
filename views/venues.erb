@@ -1,18 +1,22 @@
 <ul>
-<% @calendar.events.each do |event| %>
-	
-	<li><%= event.title %></li> 
-   	
-   		<ul>
-   	
-   			<% event.artists.each do |artist| %>
-   			   <li> <%= artist %> </li>   	    
-   	    	<% end %>
- 	
- 		</ul>
+<% if @calendar.nil? %>
+	<h1> <%= "Venue not found" %>  
+<% else %>
 
+	<% @calendar.events.each do |event| %>
+		
+		<li><%= event.title %></li> 
+	   	
+	   		<ul>
+	   	
+	   			<% event.artists.each do |artist| %>
+	   			   <li> <%= artist %> </li>   	    
+	   	    	<% end %>
+	 	
+	 		</ul>
+
+	<% end %>
+	</ul>
+	<%= @calendar.top_songs_spotify_uri %>
 <% end %>
-</ul>
-<%= @calendar.top_songs_spotify_uri %>
-
 

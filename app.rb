@@ -198,7 +198,7 @@ end
 #4
 
 class Spotify
-	ROOT_URL = 'http://ws.spotify.com/search/1/track.json?q='
+	ROOT_URL = 'http://ws.spotify.com/search/1/track.json?q=artist:'
 	def self.find_track(query)
 		query = URI.escape(query)
 		url = "#{ROOT_URL}#{query}"
