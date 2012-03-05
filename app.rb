@@ -19,12 +19,13 @@ post '/grooveshark' do
 end
 
 
-post '/stream_spot' do
+post '/spotify_playlist' do
  
  @calendar = Venue_Search.new params[:query] 
  spotify_URIs_array = []
   stream do |out|
-  	 out << "To play in spotify, copy and paste text below solid line. "
+  	 out << "To play in spotify, Create a new playlist and then drag the link below solid line into spotify.
+  	 (You have to wait for all the concerts to load first)"
   	 out << "<ul>"
    	 @calendar.events.each do |event|		
 		 out << "<li>"
@@ -45,9 +46,12 @@ post '/stream_spot' do
      	 out << "</ul>"
   	 end
   	 out << "</ul>"
+  	 out << "Drag link into a blank playlist in Spotify"
   	 out << '<HR WIDTH="100%" COLOR="#6699FF" SIZE="6">'
-  	 top_songs_spotify_uri = spotify_URIs_array.join('          ')
+  	 top_songs_spotify_uri = spotify_URIs_array.join(' ')
+  	 out << '<a href="'
   	 out << top_songs_spotify_uri
+	 out << '"> Spotify Playlist </a>'
   end
 
 end
