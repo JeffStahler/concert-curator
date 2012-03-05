@@ -2,16 +2,13 @@
 <h1> <%= params[:min_date] %> </h1>
 <h1> <%= params[:max_date] %> </h1>
 <ul>
- <% @metro_calendar.events.each do |event| %>
+ <% @calendar.events.each do |event| %>
     <li><%= event.title %></li>
 
    			<ul>
    		<% event.artists.each do |artist| %>
    			   <li> <%= artist %> </li>
-   			   <ul>
-               <li> <%= event.top_songs[artist] %> </li>                     
-               </ul>	
- 	    <% end %>
+   	    <% end %>
    			</ul>
 
    <% end %>

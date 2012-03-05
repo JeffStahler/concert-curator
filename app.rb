@@ -5,7 +5,7 @@ end
 
 post '/search' do
  # @metro_calendar = Songkick.get_events_by_city_and_dates(params[:city], params[:min_date], params[:max_date])
-  @metro_calendar = Concert_Search.new  params[:city], params[:min_date], params[:max_date]
+  @calendar = Concert_Search.new  params[:city], params[:min_date], params[:max_date]
   erb :search
 end
 
@@ -20,16 +20,71 @@ end
 
 post '/venues' do
 	
-	@venue_events = Songkick.get_venue_events(params[:query]) || []
+	@calendar = Venue_Search.new params[:query] 
+	
 	erb :venues
 end
 
+get '/multisong' do
+	top_songs = []
+	@ms = Grooveshark.mutli_song_widget(top_songs)
+	erb :multi_song
+end
+
+get '/spotify' do 
+	@search = Spotify.find_track('Beck')
+	erb :spotify
+end 
+
+
+
+class Venue_Search
+	attr_accessor :events, :top_songs, :playlist_widget, :top_songs_spotify_uri
+    def initialize(query)
+		gs = false 
+		metro_calendar = Songkick.get_venue_events(query)
+		self.events = []
+		self.top_songs = []
+		spotify_URIs_array = []  
+		metro_calendar.each do |songkick_event|
+			event = Event.new
+			event.title = songkick_event['displayName'] 
+			songkick_event['performance'].each do |performance|
+				artist_name = performance['artist']['displayName']
+				event.artists.push(artist_name)
+				spotify_uri = Spotify.find_track(artist_name)
+				unless spotify_uri.nil?
+					spotify_URIs_array.push(spotify_uri)
+				end 
+
+				if gs then  
+	 	     	 	top_song =   Grooveshark.get_top_song(artist_name)
+					unless top_song.nil?					
+					self.top_songs.push(top_song['SongID'])							
+					self.
+					song_widget = Grooveshark.single_song_widget(top_song)
+					event.top_songs[artist_name] = song_widget
+					#event.artists.push(song_widget)
+				
+					end 
+				end 
+			end
+			self.events.push(event)
+			self.top_songs_spotify_uri = spotify_URIs_array.join('          ')
+			
+		end 
+		if gs then 
+			self.playlist_widget = Grooveshark.mutli_song_widget(self.top_songs)	
+		end 
+	end
+
+end 
+
 class Concert_Search
-	attr_accessor :events, :songkick, :grooveshark
+	attr_accessor :events
 
 
 	def initialize(city, min_date, max_date)
-		self.grooveshark =  Grooveshark.new
 		metro_calendar = Songkick.get_events_by_city_and_dates(city, min_date, max_date)
 		self.events = []
 		metro_calendar.first(2).each do |songkick_event|
@@ -95,7 +150,17 @@ class Grooveshark
 	end
 
 
+	def self.mutli_song_widget(song_ids)
+		song_ids.push(30678788)
+		song_ids.push(23026077)
 
+		id = song_ids.join('')
+		id_csv = song_ids.join(',')
+		widget_html = '<object width="250" height="250" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" id="gsManySongs_id_" name="gsManySongs_id_"><param name="movie" value="http://grooveshark.com/widget.swf" /><param name="wmode" value="window" /><param name="allowScriptAccess" value="always" /><param name="flashvars" value="hostname=cowbell.grooveshark.com&songIDs=_id_csv_&bbg=000000&bth=000000&pfg=000000&lfg=000000&bt=FFFFFF&pbg=FFFFFF&pfgh=FFFFFF&si=FFFFFF&lbg=FFFFFF&lfgh=FFFFFF&sb=FFFFFF&bfg=666666&pbgh=666666&lbgh=666666&sbh=666666&p=0" /><object type="application/x-shockwave-flash" data="http://grooveshark.com/widget.swf" width="250" height="250"><param name="wmode" value="window" /><param name="allowScriptAccess" value="always" /><param name="flashvars" value="hostname=cowbell.grooveshark.com&songIDs=_id_csv_&bbg=000000&bth=000000&pfg=000000&lfg=000000&bt=FFFFFF&pbg=FFFFFF&pfgh=FFFFFF&si=FFFFFF&lbg=FFFFFF&lfgh=FFFFFF&sb=FFFFFF&bfg=666666&pbgh=666666&lbgh=666666&sbh=666666&p=0" /></object></object>'
+		widget_html.gsub(/_id_/,id)
+		widget_html.gsub(/_id_csv_/,id_csv)
+
+	end
 
 
 	def self.single_song_widget(top_song)
@@ -108,6 +173,45 @@ class Grooveshark
 
 
 end 
+
+
+
+
+	
+#artists
+
+#external-ids
+
+#href
+#spotify:track:5CgLtWawyi89C23Oy2lQIj
+
+#length
+#376.16
+
+#name
+#Closer Than You Know How
+
+#popularity
+#0.32585
+
+#track-number
+#4
+
+class Spotify
+	ROOT_URL = 'http://ws.spotify.com/search/1/track.json?q='
+	def self.find_track(query)
+		query = URI.escape(query)
+		url = "#{ROOT_URL}#{query}"
+		json = JSON.parse(RestClient.get(url))
+		sleep 0.1
+		json['tracks'].empty? ? nil : json['tracks'][0]['href'] 		
+	rescue
+		nil
+	end
+end 
+
+
+
 
 
 
