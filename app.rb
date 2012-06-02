@@ -19,6 +19,17 @@ post '/grooveshark' do
 end
 
 
+get '/leven' do
+
+	stream do |out|
+	out << HelperFunctions.levenshtein('catadfasdfadasdfasdfasdfasdfasdfasdgafgsdgasdfweradscvzdasferasdff','cab')
+	out << '</br>'
+	out << HelperFunctions.percent_same('catadfasdfadasdfasdfasdfasdfasdfasdgafgsdgasdfweradscvzdasferasdff','cab')
+	end 
+
+end 
+
+
 post '/spotify_playlist' do
  
  @calendar = Venue_Search.new params[:query] 
@@ -38,20 +49,19 @@ post '/spotify_playlist' do
 	 		out << "</li>"
 
 	 		spotify_uri = Spotify.find_track(artist)
+				
 			unless spotify_uri.nil?
+				spotify_uri = spotify_uri.gsub('spotify:track:',"")
 				spotify_URIs_array.push(spotify_uri)
 			end 
 
      	 end
      	 out << "</ul>"
   	 end
-  	 out << "</ul>"
-  	 out << "Drag link into a blank playlist in Spotify"
-  	 out << '<HR WIDTH="100%" COLOR="#6699FF" SIZE="6">'
-  	 top_songs_spotify_uri = spotify_URIs_array.join(' ')
-  	 out << '<a href="'
+  	 out << '<iframe src="https://embed.spotify.com/?uri=spotify:trackset:PREFEREDTITLE:'
+  	 top_songs_spotify_uri = spotify_URIs_array.join(',')
   	 out << top_songs_spotify_uri
-	 out << '"> Spotify Playlist </a>'
+	 out << '" frameborder="0" allowtransparency="true"></iframe>'
   end
 
 end
@@ -226,7 +236,7 @@ end
 #376.16
 
 #name
-#Closer Than You Know How
+#Closer Than You Know How``
 
 #popularity
 #0.32585
@@ -237,16 +247,46 @@ end
 class Spotify
 	ROOT_URL = 'http://ws.spotify.com/search/1/track.json?q=artist:'
 	def self.find_track(query)
-		query = URI.escape(query)
+		query = query.gsub(/&/," ")
+		query = URI.escape(query)		
 		url = "#{ROOT_URL}#{query}"
 		json = JSON.parse(RestClient.get(url))
-#		sleep 0.1
-		json['tracks'].empty? ? nil : json['tracks'][0]['href'] 		
-	rescue
-		nil
+		sleep 0.1		
+			if json['tracks'].empty? || json.nil?
+			 nil 
+			else
+				spotify_artist_name = json['tracks'][0]['artists'][0]['name']
+				fuzzmatch = FuzzyStringMatch::JaroWinkler.create( :pure )
+				same = fuzzmatch.getDistance(spotify_artist_name,query)
+				if same > 0.86
+					 #{}"#{same} #{query} #{spotify_artist_name}" 
+					 json['tracks'][0]['href'] 		
+				else
+				nil
+				end
+			end			
+	#rescue
+	#	nil
 	end
+
 end 
 
+class HelperFunctions
+	def self.levenshtein(a, b)
+ 	 	case
+    	  when a.empty? then b.length
+     	  when b.empty? then a.length
+      	  else  [(a[0] == b[0] ? 0 : 1) + levenshtein(a[1..-1], b[1..-1]),
+          	1 + levenshtein(a[1..-1], b),
+          	1 + levenshtein(a, b[1..-1])].min
+  		end
+  	end
+  	def self.percent_same(a,b)
+  		1-(levenshtein(a,b).to_f/(a.length))
+  	end
+
+
+end
 
 
 
