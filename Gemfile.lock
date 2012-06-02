@@ -2,6 +2,7 @@ GEM
   remote: http://rubygems.org/
   specs:
     json (1.6.5)
+    levenshtein (0.2.2)
     mime-types (1.17.2)
     rack (1.4.1)
     rack-protection (1.2.0)
@@ -21,6 +22,7 @@ PLATFORMS
 
 DEPENDENCIES
   json
+  levenshtein
   rest-client
   shotgun
   sinatra
