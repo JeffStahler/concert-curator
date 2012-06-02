@@ -22,9 +22,7 @@ end
 get '/leven' do
 
 	stream do |out|
-	out << HelperFunctions.levenshtein('catadfasdfadasdfasdfasdfasdfasdfasdgafgsdgasdfweradscvzdasferasdff','cab')
-	out << '</br>'
-	out << HelperFunctions.percent_same('catadfasdfadasdfasdfasdfasdfasdfasdgafgsdgasdfweradscvzdasferasdff','cab')
+	out << Levenshtein.normalized_distance('catadfasdfadasdfasdfasdfasdfasdfasdgafgsdgasdfweradscvzdasferasdff','asdfasdfasdfasdfadsewradczc')
 	end 
 
 end 
@@ -256,9 +254,8 @@ class Spotify
 			 nil 
 			else
 				spotify_artist_name = json['tracks'][0]['artists'][0]['name']
-				fuzzmatch = FuzzyStringMatch::JaroWinkler.create( :pure )
-				same = fuzzmatch.getDistance(spotify_artist_name,query)
-				if same > 0.86
+				percent_different = Levenshtein.normalized_distance(spotify_artist_name,query)
+				if percent_different < 0.5
 					 #{}"#{same} #{query} #{spotify_artist_name}" 
 					 json['tracks'][0]['href'] 		
 				else
